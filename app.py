@@ -83,7 +83,7 @@ def check_password():
 
 if check_password():
     # Display the main interface once the password is correct
-    st.markdown("<h1 style='text-align: center;'>Retranscription textuelle de vos visios/h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Retranscription textuelle de vos visios</h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align: center;'>Par Jérome IAvarone - IAvaronce conseil</p>", unsafe_allow_html=True)
     st.write("")
 
