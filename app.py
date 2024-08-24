@@ -32,44 +32,53 @@ def split_audio(audio_path, segment_length_ms=300000):
 
 def extract_audio_from_video(video_path):
     """Extract audio from a video file and save it as an mp3."""
-    video = VideoFileClip(video_path)
-    audio_path = "extracted_audio.mp3"
-    video.audio.write_audiofile(audio_path)
-    return audio_path
+    try:
+        video = VideoFileClip(video_path)
+        st.write(f"Video duration: {video.duration} seconds")
+        audio_path = "extracted_audio.mp3"
+        video.audio.write_audiofile(audio_path, verbose=False, logger=None)
+        return audio_path
+    except Exception as e:
+        st.error(f"An error occurred while extracting audio: {e}")
+        return None
 
 def transcribe_audio_segment(segment_path):
     """Transcribe a single audio segment."""
-    file = upload_to_gemini(segment_path, mime_type="audio/mpeg")
-    
-    # Configuration du modèle
-    generation_config = {
-        "temperature": 0,
-        "top_p": 0.9,
-        "top_k": 50,
-        "max_output_tokens": 8192,
-        "response_mime_type": "text/plain",
-    }
+    try:
+        file = upload_to_gemini(segment_path, mime_type="audio/mpeg")
+        
+        # Configuration du modèle
+        generation_config = {
+            "temperature": 0,
+            "top_p": 0.9,
+            "top_k": 50,
+            "max_output_tokens": 8192,
+            "response_mime_type": "text/plain",
+        }
 
-    model = genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
-        generation_config=generation_config,
-    )
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            generation_config=generation_config,
+        )
 
-    # Start chat session for transcription
-    chat_session = model.start_chat(
-        history=[
-            {
-                "role": "user",
-                "parts": [
-                    file,
-                ],
-            },
-        ]
-    )
+        # Start chat session for transcription
+        chat_session = model.start_chat(
+            history=[
+                {
+                    "role": "user",
+                    "parts": [
+                        file,
+                    ],
+                },
+            ]
+        )
 
-    # Retrieve the transcription response
-    response = chat_session.send_message("Retranscris cet audio en texte sans identifier les participants.")
-    return response.text
+        # Retrieve the transcription response
+        response = chat_session.send_message("Retranscris cet audio en texte sans identifier les participants.")
+        return response.text
+    except Exception as e:
+        st.error(f"An error occurred during transcription: {e}")
+        return ""
 
 # Password protection using st.secrets
 def check_password():
@@ -89,7 +98,7 @@ def check_password():
     else:
         return True
 
-# Affichage du titre, sous-titre, et image avant la demande de mot de passe
+# Display title, subtitle, and image before password prompt
 st.markdown("<h1 style='text-align: center;'>Retranscription textuelle de vos visios</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center;'>Par Jérome IAvarone - IAvaronce conseil</p>", unsafe_allow_html=True)
 st.write("")
@@ -97,7 +106,7 @@ image_url = "https://www.iacademy-formation.com/wp-content/uploads/2024/08/iyus-
 st.image(image_url, use_column_width=True)
 
 if check_password():
-    # Interface principale après validation du mot de passe
+    # Main interface after password validation
     st.markdown("<h2 style='text-align: left;'>Chargez vos fichiers audio ou vidéo</h2>", unsafe_allow_html=True)
 
     # Upload audio or video file
@@ -116,12 +125,13 @@ if check_password():
         if file_extension in ["mp4", "mov", "avi"]:
             st.write("Extraction de l'audio depuis la vidéo...")
             audio_path = extract_audio_from_video(f"temp_file.{file_extension}")
-            st.success("Audio extrait avec succès!")
+            if audio_path:
+                st.success("Audio extrait avec succès!")
         else:
             audio_path = f"temp_file.{file_extension}"
 
         # Transcription button
-        if st.button("Retranscrire l'audio"):
+        if audio_path and st.button("Retranscrire l'audio"):
             # Split the audio into 5-minute segments
             segments = split_audio(audio_path)
             transcription_text = ""
@@ -148,7 +158,7 @@ if check_password():
                     mime="text/plain",
                 )
 
-# Affichage du pied de page
+# Display footer
 st.write("")
 st.write("")
 st.write("")
