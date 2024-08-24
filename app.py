@@ -72,7 +72,7 @@ def check_password():
     st.session_state["password_correct"] = False
     password = st.text_input("Enter password", type="password")
     
-    if password == "your_password_here":  # Replace with your desired password
+    if password == st.secrets["PASSWORD"]:  # Replace with your desired password
         st.session_state["password_correct"] = True
         st.success("Password correct! You may now access the app.")
     elif password:
