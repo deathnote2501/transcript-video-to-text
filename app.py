@@ -63,27 +63,29 @@ def transcribe_audio_segment(segment_path):
     response = chat_session.send_message("Retranscris cet audio en texte sans identifier les participants.")
     return response.text
 
-# Setup Streamlit interface
-st.title("Transcription Audio en Texte")
-
 # Password protection using st.secrets
 def check_password():
-    """Checks if the password entered by the user is correct."""
-    password_input = st.text_input("Enter password", type="password")
-    
-    if password_input == st.secrets["PASSWORD"]:  # Use password from secrets.toml
-        st.session_state["password_correct"] = True
-    elif password_input:
-        st.error("Incorrect password, please try again.")
+    def password_entered():
+        if st.session_state["password"] == st.secrets["PASSWORD"]:
+            st.session_state["password_correct"] = True
+        else:
+            st.session_state["password_correct"] = False
 
-# Check if the user has already entered the correct password
-if "password_correct" not in st.session_state:
-    st.session_state["password_correct"] = False
+    if "password_correct" not in st.session_state:
+        st.text_input("Mot de passe", type="password", on_change=password_entered, key="password")
+        return False
+    elif not st.session_state["password_correct"]:
+        st.text_input("Mot de passe", type="password", on_change=password_entered, key="password")
+        st.error("Mot de passe incorrect")
+        return False
+    else:
+        return True
 
-if not st.session_state["password_correct"]:
-    check_password()
-else:
+if check_password():
     # Display the main interface once the password is correct
+    st.title("Transcription Audio en Texte")
+
+    # Upload audio file
     uploaded_file = st.file_uploader("Upload your audio file", type=["mp3", "wav", "m4a"])
 
     if uploaded_file is not None:
