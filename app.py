@@ -66,20 +66,22 @@ def transcribe_audio_segment(segment_path):
 # Setup Streamlit interface
 st.title("Transcription Audio en Texte")
 
-# Password protection
+# Password protection using st.secrets
 def check_password():
     """Checks if the password entered by the user is correct."""
-    st.session_state["password_correct"] = False
-    password = st.text_input("Enter password", type="password")
+    password_input = st.text_input("Enter password", type="password")
     
-    if password == st.secrets["PASSWORD"]:  # Replace with your desired password
+    if password_input == st.secrets["PASSWORD"]:  # Use password from secrets.toml
         st.session_state["password_correct"] = True
-        st.success("Password correct! You may now access the app.")
-    elif password:
+        st.experimental_rerun()  # Rerun the app to load the main interface
+    elif password_input:
         st.error("Incorrect password, please try again.")
 
 # Check if the user has already entered the correct password
-if "password_correct" not in st.session_state or not st.session_state["password_correct"]:
+if "password_correct" not in st.session_state:
+    st.session_state["password_correct"] = False
+
+if not st.session_state["password_correct"]:
     check_password()
 else:
     # Upload audio file
