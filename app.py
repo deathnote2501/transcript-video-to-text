@@ -93,6 +93,11 @@ if check_password():
     st.markdown("<h2 style='text-align: left;'>Chargez vos fichiers audio</h2>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader("", type=["mp3", "wav", "m4a"])
 
+    st.write("")
+    st.write("")
+    st.write("")
+    st.markdown("<p style='text-align: center;'>© 2024 Jérome IAvarone - jerome.iavarone@gmail.com</p>", unsafe_allow_html=True)
+
     if uploaded_file is not None:
         # Save uploaded file
         with open("temp_audio.mp3", "wb") as f:
