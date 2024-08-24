@@ -81,22 +81,19 @@ def check_password():
     else:
         return True
 
+# Affichage du titre, sous-titre, et image avant la demande de mot de passe
+st.markdown("<h1 style='text-align: center;'>Retranscription textuelle de vos visios</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Par Jérome IAvarone - IAvaronce conseil</p>", unsafe_allow_html=True)
+st.write("")
+image_url = "https://www.iacademy-formation.com/wp-content/uploads/2024/08/iyus-sugiharto-jpkxJAcp6a4-unsplash-modified-1.png"
+st.image(image_url, use_column_width=True)
+
 if check_password():
-    # Display the main interface once the password is correct
-    st.markdown("<h1 style='text-align: center;'>Retranscription textuelle de vos visios</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center;'>Par Jérome IAvarone - IAvaronce conseil</p>", unsafe_allow_html=True)
-    st.write("")
-
-    image_url = "https://www.iacademy-formation.com/wp-content/uploads/2024/08/iyus-sugiharto-jpkxJAcp6a4-unsplash-modified-1.png"
-    st.image(image_url, use_column_width=True)
-    # Upload audio file
+    # Interface principale après validation du mot de passe
     st.markdown("<h2 style='text-align: left;'>Chargez vos fichiers audio</h2>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("", type=["mp3", "wav", "m4a"])
 
-    st.write("")
-    st.write("")
-    st.write("")
-    st.markdown("<p style='text-align: center;'>© 2024 Jérome IAvarone - jerome.iavarone@gmail.com</p>", unsafe_allow_html=True)
+    # Upload audio file
+    uploaded_file = st.file_uploader("", type=["mp3", "wav", "m4a"])
 
     if uploaded_file is not None:
         # Save uploaded file
@@ -132,3 +129,9 @@ if check_password():
                     file_name="transcription.txt",
                     mime="text/plain",
                 )
+
+# Affichage du pied de page
+st.write("")
+st.write("")
+st.write("")
+st.markdown("<p style='text-align: center;'>© 2024 Jérome IAvarone - jerome.iavarone@gmail.com</p>", unsafe_allow_html=True)
