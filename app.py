@@ -73,7 +73,6 @@ def check_password():
     
     if password_input == st.secrets["PASSWORD"]:  # Use password from secrets.toml
         st.session_state["password_correct"] = True
-        st.experimental_rerun()  # Rerun the app to load the main interface
     elif password_input:
         st.error("Incorrect password, please try again.")
 
@@ -84,7 +83,7 @@ if "password_correct" not in st.session_state:
 if not st.session_state["password_correct"]:
     check_password()
 else:
-    # Upload audio file
+    # Display the main interface once the password is correct
     uploaded_file = st.file_uploader("Upload your audio file", type=["mp3", "wav", "m4a"])
 
     if uploaded_file is not None:
