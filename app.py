@@ -66,40 +66,56 @@ def transcribe_audio_segment(segment_path):
 # Setup Streamlit interface
 st.title("Transcription Audio en Texte")
 
-# Upload audio file
-uploaded_file = st.file_uploader("Upload your audio file", type=["mp3", "wav", "m4a"])
-
-if uploaded_file is not None:
-    # Save uploaded file
-    with open("temp_audio.mp3", "wb") as f:
-        f.write(uploaded_file.getbuffer())
+# Password protection
+def check_password():
+    """Checks if the password entered by the user is correct."""
+    st.session_state["password_correct"] = False
+    password = st.text_input("Enter password", type="password")
     
-    st.success("Fichier audio téléchargé avec succès!")
+    if password == "your_password_here":  # Replace with your desired password
+        st.session_state["password_correct"] = True
+        st.success("Password correct! You may now access the app.")
+    elif password:
+        st.error("Incorrect password, please try again.")
 
-    # Transcription button
-    if st.button("Retranscrire l'audio"):
-        # Split the audio into 5-minute segments
-        segments = split_audio("temp_audio.mp3")
-        transcription_text = ""
+# Check if the user has already entered the correct password
+if "password_correct" not in st.session_state or not st.session_state["password_correct"]:
+    check_password()
+else:
+    # Upload audio file
+    uploaded_file = st.file_uploader("Upload your audio file", type=["mp3", "wav", "m4a"])
 
-        # Transcribe each segment and concatenate the result
-        for i, segment_path in enumerate(segments):
-            st.write(f"Transcription du segment {i + 1}/{len(segments)} en cours...")
-            segment_text = transcribe_audio_segment(segment_path)
-            transcription_text += segment_text + "\n"
+    if uploaded_file is not None:
+        # Save uploaded file
+        with open("temp_audio.mp3", "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        
+        st.success("Fichier audio téléchargé avec succès!")
 
-        # Save the entire transcription to a text file
-        with open("transcription.txt", "w") as text_file:
-            text_file.write(transcription_text)
+        # Transcription button
+        if st.button("Retranscrire l'audio"):
+            # Split the audio into 5-minute segments
+            segments = split_audio("temp_audio.mp3")
+            transcription_text = ""
 
-        st.success("Transcription terminée!")
-        st.text_area("Texte transcrit", transcription_text)
+            # Transcribe each segment and concatenate the result
+            for i, segment_path in enumerate(segments):
+                st.write(f"Transcription du segment {i + 1}/{len(segments)} en cours...")
+                segment_text = transcribe_audio_segment(segment_path)
+                transcription_text += segment_text + "\n"
 
-        # Download button for the transcription
-        with open("transcription.txt", "rb") as f:
-            st.download_button(
-                label="Télécharger le fichier texte",
-                data=f,
-                file_name="transcription.txt",
-                mime="text/plain",
-            )
+            # Save the entire transcription to a text file
+            with open("transcription.txt", "w") as text_file:
+                text_file.write(transcription_text)
+
+            st.success("Transcription terminée!")
+            st.text_area("Texte transcrit", transcription_text)
+
+            # Download button for the transcription
+            with open("transcription.txt", "rb") as f:
+                st.download_button(
+                    label="Télécharger le fichier texte",
+                    data=f,
+                    file_name="transcription.txt",
+                    mime="text/plain",
+                )
