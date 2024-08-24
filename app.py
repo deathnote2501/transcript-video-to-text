@@ -3,6 +3,7 @@ import google.generativeai as genai
 import os
 from pydub import AudioSegment
 import math
+from moviepy.editor import VideoFileClip
 
 # Configure the Google Generative AI API key
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
@@ -28,6 +29,13 @@ def split_audio(audio_path, segment_length_ms=300000):
         segments.append(segment_path)
     
     return segments
+
+def extract_audio_from_video(video_path):
+    """Extract audio from a video file and save it as an mp3."""
+    video = VideoFileClip(video_path)
+    audio_path = "extracted_audio.mp3"
+    video.audio.write_audiofile(audio_path)
+    return audio_path
 
 def transcribe_audio_segment(segment_path):
     """Transcribe a single audio segment."""
@@ -90,22 +98,32 @@ st.image(image_url, use_column_width=True)
 
 if check_password():
     # Interface principale après validation du mot de passe
-    st.markdown("<h2 style='text-align: left;'>Chargez vos fichiers audio</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: left;'>Chargez vos fichiers audio ou vidéo</h2>", unsafe_allow_html=True)
 
-    # Upload audio file
-    uploaded_file = st.file_uploader("", type=["mp3", "wav", "m4a"])
+    # Upload audio or video file
+    uploaded_file = st.file_uploader("", type=["mp3", "wav", "m4a", "mp4", "mov", "avi"])
 
     if uploaded_file is not None:
+        file_extension = uploaded_file.name.split(".")[-1].lower()
+
         # Save uploaded file
-        with open("temp_audio.mp3", "wb") as f:
+        with open(f"temp_file.{file_extension}", "wb") as f:
             f.write(uploaded_file.getbuffer())
-        
-        st.success("Fichier audio téléchargé avec succès!")
+
+        st.success(f"Fichier {file_extension.upper()} téléchargé avec succès!")
+
+        # Check if the file is a video, and extract audio if so
+        if file_extension in ["mp4", "mov", "avi"]:
+            st.write("Extraction de l'audio depuis la vidéo...")
+            audio_path = extract_audio_from_video(f"temp_file.{file_extension}")
+            st.success("Audio extrait avec succès!")
+        else:
+            audio_path = f"temp_file.{file_extension}"
 
         # Transcription button
         if st.button("Retranscrire l'audio"):
             # Split the audio into 5-minute segments
-            segments = split_audio("temp_audio.mp3")
+            segments = split_audio(audio_path)
             transcription_text = ""
 
             # Transcribe each segment and concatenate the result
